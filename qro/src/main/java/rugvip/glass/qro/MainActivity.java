@@ -24,7 +24,6 @@ public class MainActivity extends Activity implements CameraPreview.FrameConsume
 
     private CameraPreview cameraPreview;
     private Overlay overlay;
-    private MovementSensor movementSensor;
     private QrDetector detector;
 
     @Override
@@ -37,8 +36,6 @@ public class MainActivity extends Activity implements CameraPreview.FrameConsume
 
         overlay = (Overlay) findViewById(R.id.overlay);
 
-        movementSensor = new MovementSensor(this);
-
         detector = new QrDetector(new ImageQrFactory(), new TextQrFactory());
         detector.addDetectionListener(this);
         detector.addMotionListener(this);
@@ -49,14 +46,14 @@ public class MainActivity extends Activity implements CameraPreview.FrameConsume
     @Override
     protected void onResume() {
         super.onResume();
-        movementSensor.start();
+        new MovementSensor(this).start();
         overlay.onResume();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        movementSensor.stop();
+        MovementSensor.getInstance().stop();
         overlay.onPause();
     }
 
