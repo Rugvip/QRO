@@ -39,6 +39,7 @@ public class MovementSensor {
 
     public void stop() {
         sensorManager.unregisterListener(rotationListener);
+        instance = null;
     }
 
     public void getRotation(float[] out) {
@@ -48,6 +49,7 @@ public class MovementSensor {
 
         if (rotationListener.rotation != null) {
             SensorManager.getRotationMatrixFromVector(out, rotationListener.rotation);
+            Matrix.rotateM(out, 0, 90, 1, 0, 0);
         } else {
             Matrix.setIdentityM(out, 0);
         }
