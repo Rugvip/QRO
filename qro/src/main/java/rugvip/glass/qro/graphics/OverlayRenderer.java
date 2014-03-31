@@ -85,56 +85,6 @@ public class OverlayRenderer implements GLSurfaceView.Renderer {
         return buffer;
     }
 
-    private static int compileShader(int type, String source) {
-        int shader = glCreateShader(type);
-        if (0 == shader) {
-            throw new RuntimeException("error creating shader");
-        }
-
-        glShaderSource(shader, source);
-        glCompileShader(shader);
-
-        final int[] compileStatus = new int[1];
-        glGetShaderiv(shader, GL_COMPILE_STATUS, compileStatus, 0);
-
-        if (compileStatus[0] == 0) {
-            String log = glGetShaderInfoLog(shader);
-            Log.e(TAG, "failed to compile shader: \n" + log);
-            glDeleteShader(shader);
-            shader = 0;
-        }
-
-        return shader;
-    }
-
-    private static int compileProgram(String vertexShaderSource, String fragmentShaderSource) {
-        int program = glCreateProgram();
-        if (0 == program) {
-            throw new RuntimeException("error creating program");
-        }
-
-        glAttachShader(program, compileShader(GL_VERTEX_SHADER, vertexShaderSource));
-        glAttachShader(program, compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource));
-
-        glBindAttribLocation(program, 0, "a_position");
-        glBindAttribLocation(program, 1, "a_color");
-
-        glLinkProgram(program);
-
-        final int[] linkStatus = new int[1];
-
-        glGetProgramiv(program, GL_LINK_STATUS, linkStatus, 0);
-
-        if (linkStatus[0] == 0) {
-            String log = glGetProgramInfoLog(program);
-            Log.e(TAG, "failed to link program: \n" + log);
-            glDeleteProgram(program);
-            program = 0;
-        }
-
-        return program;
-    }
-
     private float[] viewMatrix = new float[16];
     private float[] projMatrix = new float[16];
 
@@ -149,18 +99,14 @@ public class OverlayRenderer implements GLSurfaceView.Renderer {
                 0, 0, 0, // center
                 0, 1, 0); // up
 
-        int program = compileProgram(Shaders.vertexShader, Shaders.fragmentShader);
+        int program = Shaders.compileProgram(Shaders.vertexShader, Shaders.fragmentShader);
 
         u_mvp_matrix = glGetUniformLocation(program, "u_mvp_matrix");
-        a_position = glGetAttribLocation(program, "a_position");
-        a_color = glGetAttribLocation(program, "a_color");
 
         glUseProgram(program);
     }
 
     private int u_mvp_matrix;
-    private int a_position;
-    private int a_color;
 
     @Override
     public void onSurfaceChanged(GL10 ignored, int width, int height) {
@@ -182,8 +128,8 @@ public class OverlayRenderer implements GLSurfaceView.Renderer {
 
         Matrix.setIdentityM(modelMatrix, 0);
 
-        glVertexAttribPointer(a_position, 3, GL_FLOAT, false, 3 * BytesPerFloat, squareVertexBuffer);
-        glEnableVertexAttribArray(a_position);
+        glVertexAttribPointer(Attr.POSITION, 3, GL_FLOAT, false, 3 * BytesPerFloat, squareVertexBuffer);
+        glEnableVertexAttribArray(Attr.POSITION);
 
         Matrix.multiplyMM(mvpMatrix, 0, viewMatrix, 0, modelMatrix, 0);
         Matrix.multiplyMM(mvpMatrix, 0, projMatrix, 0, mvpMatrix, 0);
