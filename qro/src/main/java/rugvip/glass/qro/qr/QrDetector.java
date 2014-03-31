@@ -73,6 +73,7 @@ public class QrDetector {
         try {
             results = multiReader.decodeMultiple(new BinaryBitmap(new HybridBinarizer(source)), hints);
         } catch (NotFoundException ignored) {
+        } catch (ArrayIndexOutOfBoundsException ignored) {
         }
 
         if (results != null) {
