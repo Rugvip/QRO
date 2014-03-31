@@ -2,23 +2,20 @@ package rugvip.glass.qro;
 
 import android.content.Context;
 import android.graphics.ImageFormat;
+import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.util.AttributeSet;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
+import android.view.TextureView;
 
 import java.io.IOException;
 
-public class CameraPreview extends SurfaceView implements Camera.PreviewCallback {
-    private SurfaceHolder surfaceHolder;
+public class CameraPreview extends TextureView implements Camera.PreviewCallback {
     private Camera camera;
 
     public CameraPreview(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        surfaceHolder = getHolder();
-        assert surfaceHolder != null;
-        surfaceHolder.addCallback(new Renderer());
+        setSurfaceTextureListener(new Renderer());
     }
 
     public void stop() {
@@ -55,26 +52,18 @@ public class CameraPreview extends SurfaceView implements Camera.PreviewCallback
         currentBuffer = (currentBuffer + 1) % NUM_BUFFERS;
     }
 
-    private class Renderer implements SurfaceHolder.Callback {
+    private class Renderer implements SurfaceTextureListener {
         @Override
-        public void surfaceCreated(SurfaceHolder holder) {
-            camera = Camera.open(0);
-        }
-        @Override
-        public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-            if (camera != null) {
-                Camera.Parameters parameters = camera.getParameters();
-                parameters.setPreviewFpsRange(10000, 10000);
-                camera.setParameters(parameters);
+        public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+            camera = Camera.open();
+            assert camera != null;
 
-                try {
-                    camera.setPreviewDisplay(holder);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    stop();
-                    return;
-                }
+            Camera.Parameters parameters = camera.getParameters();
+            parameters.setPreviewFpsRange(10000, 10000);
+            camera.setParameters(parameters);
 
+            try {
+                camera.setPreviewTexture(surface);
                 camera.startPreview();
 
                 parameters = camera.getParameters();
@@ -92,12 +81,26 @@ public class CameraPreview extends SurfaceView implements Camera.PreviewCallback
                 }
                 camera.addCallbackBuffer(buffers[NUM_BUFFERS - 1]);
                 camera.setPreviewCallbackWithBuffer(CameraPreview.this);
+            } catch (IOException e) {
+                e.printStackTrace();
+                stop();
             }
         }
 
         @Override
-        public void surfaceDestroyed(SurfaceHolder holder) {
+        public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+
+        }
+
+        @Override
+        public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
             stop();
+            return false;
+        }
+
+        @Override
+        public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+
         }
     }
 }

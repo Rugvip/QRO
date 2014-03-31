@@ -5,13 +5,13 @@
     android:layout_height="match_parent"
     tools:context="rugvip.glass.qro.MainActivity">
 
-    <rugvip.glass.qro.CameraPreview
-        android:id="@+id/camera_preview"
+    <rugvip.glass.qro.Overlay
+        android:id="@+id/overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <rugvip.glass.qro.Overlay
-        android:id="@+id/overlay"
+    <rugvip.glass.qro.CameraPreview
+        android:id="@+id/camera_preview"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
