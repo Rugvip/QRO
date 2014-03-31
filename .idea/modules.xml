@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/QRO.iml" filepath="$PROJECT_DIR$/QRO.iml" />
+      <module fileurl="file://$PROJECT_DIR$/QROverlay.iml" filepath="$PROJECT_DIR$/QROverlay.iml" />
+      <module fileurl="file://$PROJECT_DIR$/qro/qro.iml" filepath="$PROJECT_DIR$/qro/qro.iml" />
+    </modules>
+  </component>
+</project>
+
