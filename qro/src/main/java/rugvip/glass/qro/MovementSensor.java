@@ -5,34 +5,61 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.nfc.Tag;
+import android.opengl.Matrix;
+import android.util.Log;
+
+import java.util.Arrays;
 
 public class MovementSensor {
-    private final GyroscopeListener gyroscopeListener;
+    private final RotationListener rotationListener;
     private final SensorManager sensorManager;
-    private final Sensor gyroscope;
+    private final Sensor rotationVector;
+
+    private static MovementSensor instance;
 
     public MovementSensor(Context context) {
+        if (instance != null) {
+            throw new IllegalStateException("only one mevement sensor allowed");
+        }
         sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
-        gyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-        gyroscopeListener = new GyroscopeListener();
+        rotationVector = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+        rotationListener = new RotationListener();
+
+        instance = this;
+    }
+
+    public static MovementSensor getInstance() {
+        return instance;
     }
 
     public void start() {
-        sensorManager.registerListener(gyroscopeListener, gyroscope, SensorManager.SENSOR_DELAY_GAME);
+        sensorManager.registerListener(rotationListener, rotationVector, SensorManager.SENSOR_DELAY_GAME);
     }
 
     public void stop() {
-        sensorManager.unregisterListener(gyroscopeListener);
+        sensorManager.unregisterListener(rotationListener);
     }
 
-    private class GyroscopeListener implements SensorEventListener {
-        private float[] filter = new float[3];
+    public void getRotation(float[] out) {
+        if (out.length != 9 && out.length != 16) {
+            throw new IllegalArgumentException("out matrix should be 3x3 or 4x4");
+        }
+
+        if (rotationListener.rotation != null) {
+            SensorManager.getRotationMatrixFromVector(out, rotationListener.rotation);
+        } else {
+            Matrix.setIdentityM(out, 0);
+        }
+    }
+
+    private class RotationListener implements SensorEventListener {
+        private float[] rotation = null;
+        private static final String TAG = "RotationSensor";
 
         @Override
         public void onSensorChanged(SensorEvent event) {
-            for (int i = 0; i < 3; i++) {
-                filter[i] = filter[i] * 0.9f + event.values[i] * 0.1f;
-            }
+            rotation = event.values;
         }
 
         @Override

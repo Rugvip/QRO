@@ -12,6 +12,8 @@ import java.nio.IntBuffer;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import rugvip.glass.qro.MovementSensor;
+
 import static android.opengl.GLES20.*;
 
 /**
@@ -104,6 +106,8 @@ public class OverlayRenderer implements GLSurfaceView.Renderer {
         u_mvp_matrix = glGetUniformLocation(program, "u_mvp_matrix");
 
         glUseProgram(program);
+
+        movementSensor = MovementSensor.getInstance();
     }
 
     private int u_mvp_matrix;
@@ -122,6 +126,10 @@ public class OverlayRenderer implements GLSurfaceView.Renderer {
     private float[] modelMatrix = new float[16];
     private float[] mvpMatrix = new float[16];
 
+    private MovementSensor movementSensor;
+
+    private float[] cameraMatrix = new float[16];
+
     @Override
     public void onDrawFrame(GL10 ignored) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -131,10 +139,13 @@ public class OverlayRenderer implements GLSurfaceView.Renderer {
         glVertexAttribPointer(Attr.POSITION, 3, GL_FLOAT, false, 3 * BytesPerFloat, squareVertexBuffer);
         glEnableVertexAttribArray(Attr.POSITION);
 
-        Matrix.multiplyMM(mvpMatrix, 0, viewMatrix, 0, modelMatrix, 0);
+        movementSensor.getRotation(cameraMatrix);
+        Matrix.multiplyMM(mvpMatrix, 0, cameraMatrix, 0, modelMatrix, 0);
+        Matrix.multiplyMM(mvpMatrix, 0, viewMatrix, 0, mvpMatrix, 0);
         Matrix.multiplyMM(mvpMatrix, 0, projMatrix, 0, mvpMatrix, 0);
 
         glUniformMatrix4fv(u_mvp_matrix, 1, false, mvpMatrix, 0);
         glDrawArrays(GL_TRIANGLES, 0, 6);
+
     }
 }
