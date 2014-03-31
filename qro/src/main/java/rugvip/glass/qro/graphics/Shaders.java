@@ -31,7 +31,7 @@ public class Shaders {
 
             "void main()" +
             "{" +
-            "    v_color = vec4(1, 0, 0, 1);" +
+            "    v_color = a_position;" +
             "    gl_Position = u_mvp_matrix * a_position;" +
             "}";
 
@@ -40,7 +40,7 @@ public class Shaders {
             "varying vec4 v_color;" +
             "void main()" +
             "{" +
-            "    gl_FragColor = v_color;" +
+            "    gl_FragColor = abs(v_color);" +
             "}";
 
     public static final int ATTR_POSITION = 0;
