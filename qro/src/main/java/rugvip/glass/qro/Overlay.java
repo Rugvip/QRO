@@ -5,6 +5,8 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.SurfaceTexture;
+import android.opengl.GLES20;
+import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Surface;
@@ -12,9 +14,14 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.TextureView;
 
-public class Overlay extends SurfaceView implements SurfaceHolder.Callback {
+import javax.microedition.khronos.egl.EGL10;
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.egl.EGLContext;
+import javax.microedition.khronos.egl.EGLDisplay;
+import javax.microedition.khronos.opengles.GL10;
+
+public class Overlay extends GLSurfaceView {
     private static final String TAG = "Overlay";
-    private RenderThread thread;
 
     public Overlay(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -22,9 +29,12 @@ public class Overlay extends SurfaceView implements SurfaceHolder.Callback {
         SurfaceHolder surfaceHolder = getHolder();
         assert surfaceHolder != null;
 
-        surfaceHolder.addCallback(this);
+        setEGLContextClientVersion(2);
+        getHolder().setFormat(PixelFormat.TRANSLUCENT);
+        setEGLConfigChooser(8, 8, 8, 8, 16, 0);
         setZOrderOnTop(true);
-        surfaceHolder.setFormat(PixelFormat.TRANSPARENT);
+
+        setRenderer(new Renderer());
     }
 
     private int redx, redy, greenx, greeny, bluex, bluey;
@@ -42,64 +52,21 @@ public class Overlay extends SurfaceView implements SurfaceHolder.Callback {
         bluey = y;
     }
 
-    @Override
-    public void surfaceCreated(SurfaceHolder holder) {
-        thread = new RenderThread(holder);
-        thread.start();
-    }
-
-    @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
-        thread.interrupt();
-    }
-
-    public class RenderThread extends Thread {
-        private SurfaceHolder surfaceHolder;
-        private boolean running = true;
-
-        public RenderThread(SurfaceHolder surfaceHolder) {
-            this.surfaceHolder = surfaceHolder;
+    public class Renderer implements GLSurfaceView.Renderer {
+        @Override
+        public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+            GLES20.glClearColor(1, 0, 0, 0.5f);
         }
 
         @Override
-        public void interrupt() {
-            running = false;
-            super.interrupt();
+        public void onSurfaceChanged(GL10 gl, int width, int height) {
+            GLES20.glViewport(0, 0, width, height);
         }
 
         @Override
-        public void run() {
-            while (running) {
-                Canvas canvas = surfaceHolder.lockCanvas();
-
-                if (canvas == null) {
-                    Log.e(TAG, "failed to lock canvas");
-                } else {
-                    Log.e(TAG, "draw: " + canvas.getWidth() + ", " + canvas.getHeight());
-
-                    canvas.drawColor(0);
-
-                    Paint paint = new Paint();
-                    paint.setColor(0xFFFF0000);
-                    canvas.drawRect(redx - 5, redy - 5, redx + 5, redy + 5, paint);
-                    paint.setColor(0xFF00FF00);
-                    canvas.drawRect(greenx - 5, greeny - 5, greenx + 5, greeny + 5, paint);
-                    paint.setColor(0xFF0000FF);
-                    canvas.drawRect(bluex - 5, bluey - 5, bluex + 5, bluey + 5, paint);
-
-                    surfaceHolder.unlockCanvasAndPost(canvas);
-                }
-
-                try {
-                    sleep(100);
-                } catch (InterruptedException ignored) {
-                }
-            }
+        public void onDrawFrame(GL10 gl) {
+            Log.e(TAG, "asd");
+            GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         }
     }
 }
