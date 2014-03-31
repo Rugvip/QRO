@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     tools:context="rugvip.glass.qro.MainActivity">
 
-    <rugvip.glass.qro.Overlay
+    <rugvip.glass.qro.graphics.Overlay
         android:id="@+id/overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

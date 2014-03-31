@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
+import rugvip.glass.qro.graphics.Overlay;
 import rugvip.glass.qro.qr.ImageQrFactory;
 import rugvip.glass.qro.qr.Qr;
 import rugvip.glass.qro.qr.QrDetectionListener;
@@ -49,12 +50,14 @@ public class MainActivity extends Activity implements CameraPreview.FrameConsume
     protected void onResume() {
         super.onResume();
         movementSensor.start();
+        overlay.onResume();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         movementSensor.stop();
+        overlay.onPause();
     }
 
     private void fitView(ImageView view, ResultPoint[] points) {
